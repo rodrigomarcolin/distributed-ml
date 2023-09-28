@@ -1,0 +1,142 @@
+{
+	"info": {
+		"_postman_id": "ecee1866-1c22-49b4-865e-595a47e7a304",
+		"name": "Distributed ML",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "20636490"
+	},
+	"item": [
+		{
+			"name": "Atribuir Parâmetros",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "cliente_key",
+							"value": "cW0eK7j0EkqX7jEKdCEdAaQJRtVRmZLWTiOCdnSe",
+							"type": "text"
+						},
+						{
+							"key": "client_secret",
+							"value": "16d9q7l0u4osk5bp0kgoc6f0ajdx13",
+							"type": "text",
+							"disabled": true
+						},
+						{
+							"key": "grant_type",
+							"value": "client_credentials",
+							"type": "text",
+							"disabled": true
+						}
+					]
+				},
+				"url": {
+					"raw": "{{host}}/tasks/atribuir-parametros/{{tarefa_id}}/",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"tasks",
+						"atribuir-parametros",
+						"{{tarefa_id}}",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Criar parametros",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"data_inicio\": \"2018-01-01\",\n    \"data_fim\": \"2023-08-01\" ,\n    \"formato_data\": \"%Y-%m-%d\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{host}}/tasks/criar-parametros/{{tarefa_id}}/",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"tasks",
+						"criar-parametros",
+						"{{tarefa_id}}",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Resultados Tarefa",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{host}}/tasks/resultados-tarefa/{{tarefa_id}}",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"tasks",
+						"resultados-tarefa",
+						"{{tarefa_id}}"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{cliente_key}}",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "cliente_key",
+			"value": "cW0eK7j0EkqX7jEKdCEdAaQJRtVRmZLWTiOCdnSe",
+			"type": "string"
+		},
+		{
+			"key": "tarefa_id",
+			"value": "942aee5c-12f8-4f0d-a510-189d42584e7c",
+			"type": "string"
+		}
+	]
+}
