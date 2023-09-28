@@ -7,3 +7,5 @@ On the bright side, the computations are independent of one another. With this i
 The current project introduces a streamlined approach to task management. It enables us to register tasks along with their associated parameter sets. By automating the assignment of subsets to individual colleagues and persisting the results, we hope to simplify and accelerate our workflow significantly.
 
 While more robust tools like Celery, RabbitMQ, or Kafka could be used for this purpose, I'm opting for a simpler approach to avoid overengineering. If the system proves highly useful in the future, I can revisit it and enhance it as needed.
+
+Trunk-based development was chosen in this scenario since I'll be the only one working on this project for now. If it becomes more complex and more people start working on it, GitFlow will be favored.
