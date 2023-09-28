@@ -14,12 +14,14 @@ class ListaTarefasView(generics.ListAPIView):
     serializer_class = TarefaSerializer
 
 
-class ResultadosTarefaView(generics.ListAPIView):
+class ResultadosTarefaView(APIView):
     serializer_class = ResultadoSerializer
 
-    def get_queryset(self):
-        tarefa_id = self.kwargs['tarefa_id']
-        return Resultado.objects.filter(parametro__tarefa_id=tarefa_id)
+    def get(self, request, tarefa_id):
+        tarefa = Tarefa.objects.get(id=tarefa_id)
+        resultados = Resultado.objects.filter(parametro__tarefa=tarefa).all()
+        serializer = self.serializer_class(resultados, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 class DetalheTarefaView(generics.RetrieveAPIView):
     queryset = Tarefa.objects.all()
@@ -67,9 +69,9 @@ class AtualizarResultadoView(generics.UpdateAPIView):
     queryset = Resultado.objects.all()
     serializer_class = ResultadoSerializer
 
-    def post(self, request):
+    def post(self, request, tarefa_id):
         try:
-            data = request.data  # Obter a lista de objetos do corpo da solicitação.
+            data = request.data.get('resultados')  # Obter a lista de objetos do corpo da solicitação.
             
             for item in data:
                 parametro_id = item.get('parametro_id')
@@ -79,11 +81,11 @@ class AtualizarResultadoView(generics.UpdateAPIView):
                 parametro = Parametro.objects.get(id=parametro_id)
 
                 # Verificar se já existe um resultado associado ao parâmetro.
-                resultado, created = Resultado.objects.get_or_create(parametro=parametro)
+                resultado, created = Resultado.objects.get_or_create(parametro=parametro, valor=valor)
 
-                # Atualizar o valor do resultado.
-                resultado.valor = valor
-                resultado.save()
+                if not created:
+                    resultado.valor = valor
+                    resultado.save()
 
             return Response({'detail': 'Resultados atualizados com sucesso.'}, status=status.HTTP_200_OK)
 
