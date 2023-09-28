@@ -1,12 +1,13 @@
+import pytz
 from datetime import datetime, timedelta
-
 from rest_framework import generics, status
 from rest_framework.response import Response
-
+from rest_framework.views import APIView
+from django.db.models import Q
 from .models import Cliente, Parametro, Resultado, Tarefa
 from .serializers import (ParametroSerializer, ResultadoSerializer,
                           TarefaSerializer)
-
+from django.utils import timezone
 
 class ListaTarefasView(generics.ListAPIView):
     queryset = Tarefa.objects.all()
@@ -25,10 +26,10 @@ class DetalheTarefaView(generics.RetrieveAPIView):
     serializer_class = TarefaSerializer
 
 MAXIMO_PARAMS_POR_ATRIBUICAO = 100
-class AtribuirParametrosView(generics.CreateAPIView):
+class AtribuirParametrosView(APIView):
     serializer_class = ParametroSerializer
 
-    def create(self, request, tarefa_id):
+    def post(self, request, tarefa_id):
         # Obter o ID do cliente a partir do corpo da solicitação.
         cliente_key = request.data.get('cliente_key')
 
@@ -38,19 +39,19 @@ class AtribuirParametrosView(generics.CreateAPIView):
             cliente = Cliente.objects.get(key=cliente_key)
 
             # Calcular o limite de tempo (4 minutos no passado).
-            limite_tempo = datetime.now() - timedelta(minutes=4)
+            limite_tempo = timezone.now() - timedelta(minutes=4)
 
             # Filtrar os parâmetros que atendem aos critérios.
             parametros = Parametro.objects.filter(
+                Q(data_atribuicao__lt=limite_tempo) | Q(data_atribuicao__isnull=True),
                 tarefa=tarefa,
                 resultado_associado__isnull=True,
-                data_atribuicao__lte=limite_tempo
             ).all()[:MAXIMO_PARAMS_POR_ATRIBUICAO]
 
             # Atribuir o cliente e atualizar a data de atribuição.
             for parametro in parametros:
                 parametro.cliente = cliente
-                parametro.data_atribuicao = datetime.now().strftime("%Y-%m-%d")
+                parametro.data_atribuicao = timezone.now()
                 parametro.save()
 
             # Serializar e retornar a lista de parâmetros.
@@ -128,10 +129,10 @@ class CriarParametrosView(generics.CreateAPIView):
                 msg = f'A data fim ({data_fim_str}) não pode ser anterior à data de início ({data_inicio_str})'
                 raise ValueError(msg)
             
-            # Criar parâmetros com valores de data no intervalo especificado.
             parametros_criados = []
             while data_inicio <= data_fim:
-                parametro = Parametro(tarefa=tarefa, valor=data_inicio)
+                valor_param = {"data": data_inicio.strftime(formato_data)}
+                parametro = Parametro(tarefa=tarefa, valor=valor_param)
                 parametro.save()
                 parametros_criados.append(parametro)
                 data_inicio += timedelta(days=1)  

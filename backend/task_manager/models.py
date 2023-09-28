@@ -37,7 +37,7 @@ class Parametro(models.Model):
         blank=True,
         related_name="parametros",
     )
-    data_atribuicao = models.DateTimeField()
+    data_atribuicao = models.DateTimeField(blank=True, null=True)
     valor = models.JSONField()
 
 
