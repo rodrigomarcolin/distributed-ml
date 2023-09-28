@@ -4,7 +4,7 @@ import uuid
 
 
 class Cliente(models.Model):
-    key = models.CharField(max_length=40, unique=True)
+    key = models.CharField(max_length=40, unique=True, blank=True)
     name = models.CharField(max_length=40, unique=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
