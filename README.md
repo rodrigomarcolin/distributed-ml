@@ -1,4 +1,4 @@
-# distributed-ml
+# Distributed Machine Learning
 
 This proof-of-concept distributed machine learning solution targets a highly specific and recurring challenge frequently encountered during my work at TuringUSP. **Within the scope of my ongoing project**, our machine learning pipelines demand substantial computational resources. Rather than opting for cloud computing, our preference **in this case** is to execute these tasks exclusively on our own local machines. Each parameter within a defined set requires substantial computational resources, and attempting to execute them all on my modest machine yields unacceptably long processing times.
 
