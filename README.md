@@ -20,3 +20,4 @@ Trunk-based development was chosen in this scenario since I'll be the only one w
 
 ## Requirements
 
+Python >= 3.10 
