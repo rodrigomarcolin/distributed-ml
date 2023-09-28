@@ -137,6 +137,11 @@
 			"key": "tarefa_id",
 			"value": "942aee5c-12f8-4f0d-a510-189d42584e7c",
 			"type": "string"
+		},
+		{
+			"key": "host",
+			"value": "http://127.0.0.1:8000",
+			"type": "string"
 		}
 	]
 }

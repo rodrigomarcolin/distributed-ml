@@ -17,6 +17,7 @@ class ParametroSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class ResultadoSerializer(serializers.ModelSerializer):
+    parametro = ParametroSerializer(required=True)
     class Meta:
         model = Resultado
         fields = '__all__'
