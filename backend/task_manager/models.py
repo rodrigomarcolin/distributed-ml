@@ -27,6 +27,7 @@ class Tarefa(models.Model):
     descricao = models.TextField()
     concluida = models.BooleanField(default=False)
     max_segundos_espera = models.PositiveIntegerField()
+    configuracoes = models.JSONField(blank=True, null=True)
 
     def __str__(self):
         return self.nome
