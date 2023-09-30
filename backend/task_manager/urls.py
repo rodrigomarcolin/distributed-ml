@@ -4,21 +4,23 @@ from .views import *
 
 urlpatterns = [
     path(
-        "atribuir-parametros/<uuid:tarefa_id>/",
+        "atribuir-parametros/<str:nome_tarefa>/",
         AtribuirParametrosView.as_view(),
         name="atribuir-parametros",
     ),
     path(
-        "atualizar-resultado/<uuid:tarefa_id>/",
+        "atualizar-resultado/",
         AtualizarResultadoView.as_view(),
         name="atualizar-resultado",
     ),
     path(
-        "criar-parametros/<uuid:tarefa_id>/",
+        "criar-parametros/<str:nome_tarefa>/",
         CriarParametrosView.as_view(),
         name="criar-parametros",
     ),
     path(
-        "resultados-tarefa/<uuid:tarefa_id>/", ResultadosTarefaView.as_view(), name="resultados-tarefa"
+        "resultados-tarefa/<str:nome_tarefa>/",
+        ResultadosTarefaView.as_view(),
+        name="resultados-tarefa",
     ),
 ]

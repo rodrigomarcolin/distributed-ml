@@ -1,12 +1,16 @@
-import pytz
 from datetime import datetime, timedelta
+
+from django.db import transaction
+from django.utils import timezone
 from rest_framework import generics, status
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.request import Request
 from rest_framework.views import APIView
-from django.db.models import Q
+
+from .authentication import BearerTokenAuthentication
 from .models import Cliente, Parametro, Resultado, Tarefa
 from .serializers import ParametroSerializer, ResultadoSerializer, TarefaSerializer
-from django.utils import timezone
 
 
 class ListaTarefasView(generics.ListAPIView):
@@ -17,11 +21,10 @@ class ListaTarefasView(generics.ListAPIView):
 class ResultadosTarefaView(APIView):
     serializer_class = ResultadoSerializer
 
-    def get(self, request, tarefa_id):
-        tarefa = Tarefa.objects.get(id=tarefa_id)
-        resultados = Resultado.objects.filter(parametro__tarefa=tarefa).all()
-        serializer = self.serializer_class(resultados, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+    def get(self, request, nome_tarefa):
+        resultados = Resultado.objects.by_tarefa_nome(nome_tarefa)
+        serialized_resultados = self.serializer_class(resultados, many=True).data
+        return Response(serialized_resultados, status=status.HTTP_200_OK)
 
 
 class DetalheTarefaView(generics.RetrieveAPIView):
@@ -29,38 +32,34 @@ class DetalheTarefaView(generics.RetrieveAPIView):
     serializer_class = TarefaSerializer
 
 
-MAXIMO_PARAMS_POR_ATRIBUICAO = 20
-
-
 class AtribuirParametrosView(APIView):
-    serializer_class = ParametroSerializer
+    """
+    Pega parâmetros disponíveis de uma determinada tarefa
+    e os atribui ao cliente que fez a solicitação
+    """
 
-    def post(self, request, tarefa_id):
-        # Obter o ID do cliente a partir do corpo da solicitação.
-        cliente_key = request.data.get("cliente_key")
+    serializer_class = ParametroSerializer
+    authentication_classes = [BearerTokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    default_batch_size = 20
+
+    def post(self, request: Request, nome_tarefa: str):
+        cliente_key = request.auth
+
+        batch_size = int(
+            request.query_params.get("batch_size", self.default_batch_size)
+        )
 
         try:
-            # Verificar se a tarefa e o cliente existem.
-            tarefa = Tarefa.objects.get(id=tarefa_id)
-            cliente = Cliente.objects.get(key=cliente_key)
+            max_segundos = Tarefa.objects.get(nome=nome_tarefa).max_segundos_espera
+            max_dt_attr = timezone.now() - timedelta(seconds=max_segundos)
 
-            # Calcular o limite de tempo (4 minutos no passado).
-            limite_tempo = timezone.now() - timedelta(minutes=4)
+            parametros = Parametro.objects.available_by_task_name(
+                nome_tarefa, max_dt_attr
+            )[:batch_size]
+            Parametro.objects.bulk_set_client_by_key(parametros, cliente_key)
 
-            # Filtrar os parâmetros que atendem aos critérios.
-            parametros = Parametro.objects.filter(
-                Q(data_atribuicao__lt=limite_tempo) | Q(data_atribuicao__isnull=True),
-                tarefa=tarefa,
-                resultado_associado__isnull=True,
-            ).all()[:MAXIMO_PARAMS_POR_ATRIBUICAO]
-
-            # Atribuir o cliente e atualizar a data de atribuição.
-            for parametro in parametros:
-                parametro.cliente = cliente
-                parametro.data_atribuicao = timezone.now()
-                parametro.save()
-
-            # Serializar e retornar a lista de parâmetros.
             serializer = self.serializer_class(parametros, many=True)
             return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -74,31 +73,22 @@ class AtribuirParametrosView(APIView):
             )
 
 
-class AtualizarResultadoView(generics.UpdateAPIView):
-    queryset = Resultado.objects.all()
+class AtualizarResultadoView(APIView):
+    """
+    Atualiza os resultados associados a determinados parâmetros
+    """
+
+    authentication_classes = [BearerTokenAuthentication]
     serializer_class = ResultadoSerializer
 
-    def post(self, request, tarefa_id):
+    def post(self, request):
         try:
-            data = request.data.get(
-                "resultados"
-            )  # Obter a lista de objetos do corpo da solicitação.
+            data = request.data.get("resultados")
+            parametro_valor_map = {
+                item.get("parametro_id"): item.get("valor") for item in data
+            }
 
-            for item in data:
-                parametro_id = item.get("parametro_id")
-                valor = item.get("valor")
-
-                # Verificar se o parâmetro existe.
-                parametro = Parametro.objects.get(id=parametro_id)
-
-                # Verificar se já existe um resultado associado ao parâmetro.
-                resultado, created = Resultado.objects.get_or_create(
-                    parametro=parametro, valor=valor
-                )
-
-                if not created:
-                    resultado.valor = valor
-                    resultado.save()
+            Parametro.objects.create_or_update_resultados(parametro_valor_map)
 
             return Response(
                 {"detail": "Resultados atualizados com sucesso."},
@@ -107,44 +97,18 @@ class AtualizarResultadoView(generics.UpdateAPIView):
 
         except Parametro.DoesNotExist:
             return Response(
-                {"detail": "Parâmetro não encontrado."},
-                status=status.HTTP_404_NOT_FOUND,
-            )
-
-    def update(self, request, *args, **kwargs):
-        try:
-            parametro_id = kwargs["parametro_id"]
-            valor = request.data.get("valor")
-
-            # Verificar se o parâmetro existe.
-            parametro = Parametro.objects.get(id=parametro_id)
-
-            # Verificar se já existe um resultado associado ao parâmetro.
-            resultado, created = Resultado.objects.get_or_create(parametro=parametro)
-
-            # Atualizar o valor do resultado.
-            resultado.valor = valor
-            resultado.save()
-
-            return Response(
-                {"detail": "Resultado atualizado com sucesso."},
-                status=status.HTTP_200_OK,
-            )
-
-        except Parametro.DoesNotExist:
-            return Response(
-                {"detail": "Parâmetro não encontrado."},
+                {"detail": "Um ou mais parâmetros não foram encontrados."},
                 status=status.HTTP_404_NOT_FOUND,
             )
 
 
-class CriarParametrosView(generics.CreateAPIView):
+class CriarParametrosView(APIView):
     serializer_class = ParametroSerializer
 
-    def create(self, request, tarefa_id):
+    def post(self, request, nome_tarefa: str):
         msg = None
         try:
-            tarefa = Tarefa.objects.get(id=tarefa_id)
+            tarefa = Tarefa.objects.get(nome=nome_tarefa)
 
             data_inicio_str = request.data.get("data_inicio")
             data_fim_str = request.data.get("data_fim")
