@@ -13,9 +13,11 @@ from .models import Cliente, Parametro, Resultado, Tarefa
 from .serializers import ParametroSerializer, ResultadoSerializer, TarefaSerializer
 
 
-class ListaTarefasView(generics.ListAPIView):
+class TarefasList(generics.ListCreateAPIView):
     queryset = Tarefa.objects.all()
     serializer_class = TarefaSerializer
+    authentication_classes = [BearerTokenAuthentication]
+    permission_classes = [IsAuthenticated]
 
 
 class ResultadosTarefaView(APIView):
@@ -99,46 +101,4 @@ class AtualizarResultadoView(APIView):
             return Response(
                 {"detail": "Um ou mais parâmetros não foram encontrados."},
                 status=status.HTTP_404_NOT_FOUND,
-            )
-
-
-class CriarParametrosView(APIView):
-    serializer_class = ParametroSerializer
-
-    def post(self, request, nome_tarefa: str):
-        msg = None
-        try:
-            tarefa = Tarefa.objects.get(nome=nome_tarefa)
-
-            data_inicio_str = request.data.get("data_inicio")
-            data_fim_str = request.data.get("data_fim")
-            formato_data = request.data.get("formato_data")
-
-            data_inicio = datetime.strptime(data_inicio_str, formato_data)
-            data_fim = datetime.strptime(data_fim_str, formato_data)
-
-            if data_fim < data_inicio:
-                msg = f"A data fim ({data_fim_str}) não pode ser anterior à data de início ({data_inicio_str})"
-                raise ValueError(msg)
-
-            parametros_criados = []
-            while data_inicio <= data_fim:
-                valor_param = {"data": data_inicio.strftime(formato_data)}
-                parametro = Parametro(tarefa=tarefa, valor=valor_param)
-                parametro.save()
-                parametros_criados.append(parametro)
-                data_inicio += timedelta(days=1)
-
-            serializer = self.serializer_class(parametros_criados, many=True)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-
-        except Tarefa.DoesNotExist:
-            return Response(
-                {"detail": "Tarefa não encontrada."}, status=status.HTTP_404_NOT_FOUND
-            )
-        except ValueError:
-            default_error = "Formato de data inválido."
-            return Response(
-                {"detail": default_error if msg is None else msg},
-                status=status.HTTP_400_BAD_REQUEST,
             )
