@@ -23,7 +23,7 @@ class Cliente(models.Model):
 
 class Tarefa(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    nome = models.CharField(max_length=40, unique=True)
+    nome = models.SlugField(max_length=40, unique=True)
     descricao = models.TextField()
     concluida = models.BooleanField(default=False)
     max_segundos_espera = models.PositiveIntegerField()

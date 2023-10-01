@@ -19,4 +19,9 @@ urlpatterns = [
         name="resultados-tarefa",
     ),
     path("tarefa/", TarefasList.as_view(), name="tarefa"),
+    path(
+        "tarefa/<slug:nome>/",
+        TarefaDetailView.as_view(),
+        name="detalhes-tarefa",
+    ),
 ]

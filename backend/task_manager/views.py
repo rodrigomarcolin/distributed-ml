@@ -3,6 +3,7 @@ from datetime import datetime, timedelta
 from django.db import transaction
 from django.utils import timezone
 from rest_framework import generics, status
+from rest_framework.generics import RetrieveAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.request import Request
@@ -18,6 +19,14 @@ class TarefasList(generics.ListCreateAPIView):
     serializer_class = TarefaSerializer
     authentication_classes = [BearerTokenAuthentication]
     permission_classes = [IsAuthenticated]
+
+
+class TarefaDetailView(RetrieveAPIView):
+    queryset = Tarefa.objects.all()
+    authentication_classes = [BearerTokenAuthentication]
+    permission_classes = [IsAuthenticated]
+    serializer_class = TarefaSerializer
+    lookup_field = "nome"
 
 
 class ResultadosTarefaView(APIView):
