@@ -95,6 +95,53 @@
 				}
 			},
 			"response": []
+		},
+		{
+			"name": "Listar Tarefas",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{host}}/tasks/tarefa/",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"tasks",
+						"tarefa",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Criar Tarefas",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"nome\": \"teste6\",\n    \"descricao\": \"teste\",\n    \"max_segundos_espera\": 120,\n    \"configuracoes\": {\n        \"estimator\": \"RandomForestRegressor\",\n        \"params\": {\n            \"teste\": \"a\"\n        }\n    },\n    \"parametros\": [\n        {\n            \"valor\": {}\n        }\n    ]\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{host}}/tasks/tarefa/",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"tasks",
+						"tarefa",
+						""
+					]
+				}
+			},
+			"response": []
 		}
 	],
 	"auth": {
@@ -134,13 +181,13 @@
 			"type": "string"
 		},
 		{
-			"key": "tarefa_id",
-			"value": "942aee5c-12f8-4f0d-a510-189d42584e7c",
+			"key": "nome_tarefa",
+			"value": "Computação",
 			"type": "string"
 		},
 		{
 			"key": "host",
-			"value": "http://127.0.0.1:8000",
+			"value": "http://localhost:8000",
 			"type": "string"
 		}
 	]
