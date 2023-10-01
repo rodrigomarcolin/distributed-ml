@@ -14,13 +14,9 @@ urlpatterns = [
         name="atualizar-resultado",
     ),
     path(
-        "criar-parametros/<str:nome_tarefa>/",
-        CriarParametrosView.as_view(),
-        name="criar-parametros",
-    ),
-    path(
         "resultados-tarefa/<str:nome_tarefa>/",
         ResultadosTarefaView.as_view(),
         name="resultados-tarefa",
     ),
+    path("tarefa/", TarefasList.as_view(), name="tarefa"),
 ]
