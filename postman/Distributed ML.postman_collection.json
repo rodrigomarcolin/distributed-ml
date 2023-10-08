@@ -7,7 +7,7 @@
 	},
 	"item": [
 		{
-			"name": "Atribuir Parâmetros",
+			"name": "Pegar Parâmetros",
 			"request": {
 				"method": "POST",
 				"header": [],
@@ -16,61 +16,20 @@
 					"urlencoded": [
 						{
 							"key": "cliente_key",
-							"value": "cW0eK7j0EkqX7jEKdCEdAaQJRtVRmZLWTiOCdnSe",
+							"value": "{{cliente_key}}",
 							"type": "text"
-						},
-						{
-							"key": "client_secret",
-							"value": "16d9q7l0u4osk5bp0kgoc6f0ajdx13",
-							"type": "text",
-							"disabled": true
-						},
-						{
-							"key": "grant_type",
-							"value": "client_credentials",
-							"type": "text",
-							"disabled": true
 						}
 					]
 				},
 				"url": {
-					"raw": "{{host}}/tasks/atribuir-parametros/{{tarefa_id}}/",
+					"raw": "{{host}}/tasks/atribuir-parametros/{{nome_tarefa}}/",
 					"host": [
 						"{{host}}"
 					],
 					"path": [
 						"tasks",
 						"atribuir-parametros",
-						"{{tarefa_id}}",
-						""
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Criar parametros",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n    \"data_inicio\": \"2018-01-01\",\n    \"data_fim\": \"2023-08-01\" ,\n    \"formato_data\": \"%Y-%m-%d\"\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "{{host}}/tasks/criar-parametros/{{tarefa_id}}/",
-					"host": [
-						"{{host}}"
-					],
-					"path": [
-						"tasks",
-						"criar-parametros",
-						"{{tarefa_id}}",
+						"{{nome_tarefa}}",
 						""
 					]
 				}
@@ -83,14 +42,14 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "{{host}}/tasks/resultados-tarefa/{{tarefa_id}}",
+					"raw": "{{host}}/tasks/resultados-tarefa/{{nome_tarefa}}",
 					"host": [
 						"{{host}}"
 					],
 					"path": [
 						"tasks",
 						"resultados-tarefa",
-						"{{tarefa_id}}"
+						"{{nome_tarefa}}"
 					]
 				}
 			},
@@ -122,7 +81,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"nome\": \"teste6\",\n    \"descricao\": \"teste\",\n    \"max_segundos_espera\": 120,\n    \"configuracoes\": {\n        \"estimator\": \"RandomForestRegressor\",\n        \"params\": {\n            \"teste\": \"a\"\n        }\n    },\n    \"parametros\": [\n        {\n            \"valor\": {}\n        }\n    ]\n}",
+					"raw": "{\n    \"nome\": \"teste6\",\n    \"descricao\": \"teste\",\n    \"max_segundos_espera\": 120,\n    \"configuracoes\": {\n        \"estimator\": \"RandomForestRegressor\",\n        \"params\": {\n            \"n_jobs\": -1,\n            \"n_estimators\": 200,\n            \"criterion\": \"squared_error\", \n            \"max_depth\": null, \n            \"min_samples_split\": 3 \n        }\n    },\n    \"parametros\": [\n        {\n            \"valor\": {}\n        }\n    ]\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -137,6 +96,53 @@
 					"path": [
 						"tasks",
 						"tarefa",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Tarefa por nome",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{host}}/tasks/tarefa/{{nome_tarefa}}",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"tasks",
+						"tarefa",
+						"{{nome_tarefa}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Atualizar Resultados",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"resultados\": [\n        {\n            \"parametro_id\": \"6abd9231-3b58-46ce-a942-758522441f7c\",\n            \"valor\": {\n                \"retorno\": -0.035190590441074,\n                \"sinal\": -1.0,\n                \"ticker\": \"Activision\"\n            }\n        }\n    ]\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{host}}/tasks/atualizar-resultado/",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"tasks",
+						"atualizar-resultado",
 						""
 					]
 				}
@@ -182,7 +188,7 @@
 		},
 		{
 			"key": "nome_tarefa",
-			"value": "Computação",
+			"value": "rfr_all_features",
 			"type": "string"
 		},
 		{
